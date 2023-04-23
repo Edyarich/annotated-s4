@@ -1,7 +1,6 @@
 import os
 import shutil
 from functools import partial
-import hydra
 import jax
 import jax.numpy as np
 import optax
@@ -12,7 +11,7 @@ from omegaconf import DictConfig, OmegaConf
 from tqdm import tqdm
 from .data import Datasets
 from .dss import DSSLayer
-from .s4 import BatchStackedModel, S4Layer, SSMLayer, sample_image_prefix
+from .s4 import S4Layer, BatchStackedModel
 from .s4d import S4DLayer
 
 
@@ -288,7 +287,6 @@ class LSTMRecurrentModel(nn.Module):
 Models = {
     "ff": FeedForwardModel,
     "lstm": LSTMRecurrentModel,
-    "ssm": SSMLayer,
     "s4": S4Layer,
     "dss": DSSLayer,
     "s4d": S4DLayer,
@@ -385,14 +383,14 @@ def example_train(
             )
 
         if train.sample is not None:
-            if dataset == "mnist":  # Should work for QuickDraw too but untested
-                sample_fn = partial(
-                    sample_image_prefix, imshape=(28, 28)
-                )  # params=state["params"], length=784, bsz=64, prefix=train.sample)
-            else:
-                raise NotImplementedError(
-                    "Sampling currently only supported for MNIST"
-                )
+            # if dataset == "mnist":  # Should work for QuickDraw too but untested
+            #     sample_fn = partial(
+            #         sample_image_prefix, imshape=(28, 28)
+            #     )  # params=state["params"], length=784, bsz=64, prefix=train.sample)
+            # else:
+            raise NotImplementedError(
+                "Sampling currently only supported for MNIST"
+            )
 
             # model_cls = partial(
             #     BatchStackedModel,
@@ -449,7 +447,7 @@ def example_train(
             wandb.run.summary["Best Epoch"] = best_epoch
 
 
-@hydra.main(version_base=None, config_path="", config_name="config")
+# @hydra.main(version_base=None, config_path="", config_name="config")
 def main(cfg: DictConfig) -> None:
     print(OmegaConf.to_yaml(cfg))
     OmegaConf.set_struct(cfg, False)  # Allow writing keys
